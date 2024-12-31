@@ -1,101 +1,288 @@
-.admin-panel {
-    padding: 20px;
-    max-width: 1000px;
-    margin: auto;
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
   
-  .admin-panel h2 {
-    font-size: 2rem;
-    text-align: center;
-    margin-bottom: 20px;
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f7f7f7;
   }
   
-  .menu-form {
-    display: grid;
-    gap: 15px;
-    margin-bottom: 30px;
+  h1, h2 {
+    color: #333;
+    font-weight: bold;
   }
   
-  .menu-form input,
-  .menu-form textarea {
-    width: 100%;
-    padding: 10px;
-    font-size: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-  }
-  
-  .menu-form button {
-    padding: 10px;
-    font-size: 1rem;
-    background-color: #4CAF50;
-    color: white;
+  button {
     border: none;
-    border-radius: 5px;
     cursor: pointer;
   }
   
-  .menu-list {
+  button:hover {
+    opacity: 0.8;
+  }
+  
+  input[type="text"], 
+  input[type="number"], 
+  input[type="url"] {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  input[type="submit"], button {
+    width: 100%;
+    padding: 12px;
+    background-color: #0056b3;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  /* Admin Panel Section */
+  .admin-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-panel h1 {
+    text-align: center;
+    font-size: 36px;
+    color: #333;
+  }
+  
+  .generate-qrcode-btn {
+    background-color: #38a1db;
+    color: white;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border: none;
+  }
+  
+  .generate-qrcode-btn:hover {
+    background-color: #007f9e;
+  }
+  
+  .qrcode-container {
+    text-align: center;
     margin-top: 30px;
   }
   
-  .menu-list ul {
-    list-style-type: none;
-    padding: 0;
+  .qrcode-container button {
+    background-color: #5bbd63;
+    padding: 8px 15px;
+    margin-top: 15px;
+    font-size: 16px;
   }
   
-  .menu-list li {
+  .food-form {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    gap: 12px;
+    margin-top: 30px;
+    width: 100%;
+    max-width: 600px;
   }
   
-  .menu-list li img {
-    max-width: 100%;
-    height: auto;
-    margin-bottom: 10px;
+  .food-form input {
+    font-size: 16px;
   }
   
-  .menu-list li h4 {
-    font-size: 1.5rem;
-    margin-bottom: 5px;
-  }
-  
-  .menu-list li p {
-    margin: 5px 0;
-  }
-  
-  .menu-list button {
-    padding: 8px 12px;
-    font-size: 0.9rem;
-    margin-right: 10px;
-    background-color: #f1c40f;
+  .food-form button {
+    width: 100%;
+    background-color: #28a745;
     color: white;
-    border: none;
+    font-size: 18px;
+    padding: 12px;
+    margin-top: 20px;
+    border-radius: 4px;
+  }
+  
+  .food-list {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 900px;
+  }
+  
+  .food-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    border: 1px solid #ececec;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .food-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .food-item div {
+    flex: 1;
+    padding: 5px;
+  }
+  
+  .food-item h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .food-item p {
+    font-size: 16px;
+    color: #666;
+  }
+  
+  .food-item button {
+    padding: 10px;
+    font-size: 14px;
+    background-color: #ff4444;
+    color: white;
     border-radius: 5px;
-    cursor: pointer;
+    border: none;
   }
   
-  .menu-list button:last-child {
-    background-color: #e74c3c;
+  .food-item button:hover {
+    background-color: #cc3535;
   }
   
-  /* Media Query for smaller screens */
-  @media (max-width: 768px) {
+  .food-item .edit-btn {
+    background-color: #ffcc00;
+  }
+  
+  .food-item .edit-btn:hover {
+    background-color: #f1c200;
+  }
+  
+  /* Media Queries for Responsiveness */
+  
+  /* Mobile Devices */
+  @media only screen and (max-width: 767px) {
     .admin-panel {
       padding: 15px;
     }
   
-    .menu-form {
-      grid-template-columns: 1fr;
+    .admin-panel h1 {
+      font-size: 28px;
     }
   
-    .menu-list li {
+    .generate-qrcode-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+    }
+  
+    .food-form {
+      padding: 15px;
+    }
+  
+    .food-form input {
+      padding: 15px;
+      font-size: 16px;
+    }
+  
+    .food-form button {
+      font-size: 16px;
+    }
+  
+    .food-list {
+      width: 100%;
+      padding: 15px;
+    }
+  
+    .food-item {
       display: block;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+  
+    .food-item img {
+      margin-bottom: 10px;
+      width: 80px;
+      height: 80px;
+    }
+  
+    .food-item div {
+      width: calc(100% - 110px);
+    }
+  
+    .food-item button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      text-align: center;
+    }
+  
+    .food-item .edit-btn, .food-item button {
+      width: 48%;
+      margin-bottom: 10px;
+    }
+  }
+  
+  /* Tablet Devices */
+  @media only screen and (max-width: 1024px) {
+    .admin-panel {
+      padding: 20px;
+    }
+  
+    .generate-qrcode-btn {
+      width: auto;
+    }
+  
+    .food-form {
+      margin-top: 25px;
+    }
+  
+    .food-item {
+      gap: 15px;
+      flex-wrap: nowrap;
+    }
+  
+    .food-item button {
+      width: 100%;
+    }
+  
+    .food-item img {
+      width: 90px;
+      height: 90px;
+    }
+  }
+  
+  /* Large Desktop Devices */
+  @media only screen and (min-width: 1200px) {
+    .admin-panel {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  
+    .food-form {
+      max-width: 800px;
+    }
+  
+    .food-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
     }
   }
   
