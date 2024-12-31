@@ -1,0 +1,101 @@
+.admin-panel {
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+  }
+  
+  .admin-panel h2 {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .menu-form {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .menu-form input,
+  .menu-form textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .menu-form button {
+    padding: 10px;
+    font-size: 1rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .menu-list {
+    margin-top: 30px;
+  }
+  
+  .menu-list ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .menu-list li {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .menu-list li img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+  }
+  
+  .menu-list li h4 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+  }
+  
+  .menu-list li p {
+    margin: 5px 0;
+  }
+  
+  .menu-list button {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    margin-right: 10px;
+    background-color: #f1c40f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .menu-list button:last-child {
+    background-color: #e74c3c;
+  }
+  
+  /* Media Query for smaller screens */
+  @media (max-width: 768px) {
+    .admin-panel {
+      padding: 15px;
+    }
+  
+    .menu-form {
+      grid-template-columns: 1fr;
+    }
+  
+    .menu-list li {
+      display: block;
+    }
+  }
+  
