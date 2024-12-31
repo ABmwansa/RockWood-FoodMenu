@@ -1,118 +1,124 @@
 import React, { useState } from 'react';
-import '../style/AdminPanel.css'
+import { QRCodeCanvas } from 'qrcode.react'; // Import QRCodeCanvas
+import '../style/AdminPanel.css'; // Import the CSS for styling
+
+// Temporary data for food items (this would be managed via API calls in a real application)
+const initialFoods = [
+  { id: 1, name: 'Pizza', description: 'Delicious cheesy pizza with toppings', price: 12.99, imageUrl: 'pizza.jpg' },
+  { id: 2, name: 'Burger', description: 'Juicy burger with fresh ingredients', price: 8.99, imageUrl: 'burger.jpg' },
+];
 
 const AdminPanel = () => {
-  const [menuItem, setMenuItem] = useState({
-    name: '',
-    description: '',
-    price: '',
-    image: '',
-  });
-  const [menu, setMenu] = useState([]);
-  const [editIndex, setEditIndex] = useState(null);
+  const [qrVisible, setQrVisible] = useState(false);
+  const [foods, setFoods] = useState(initialFoods); // State for storing food items
+  const [foodName, setFoodName] = useState('');
+  const [foodDescription, setFoodDescription] = useState('');
+  const [foodPrice, setFoodPrice] = useState('');
+  const [foodImage, setFoodImage] = useState('');
 
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setMenuItem({ ...menuItem, [name]: value });
-  };
+  // Toggle the visibility of the QR code
+  const toggleQRVisibility = () => setQrVisible(!qrVisible);
 
-  // Add new menu item
-  const handleAddItem = () => {
-    if (menuItem.name && menuItem.price) {
-      setMenu([...menu, menuItem]);
-      setMenuItem({
-        name: '',
-        description: '',
-        price: '',
-        image: '',
-      });
+  // Handle form submission to add a new food item
+  const handleAddFood = (e) => {
+    e.preventDefault();
+    if (foodName && foodDescription && foodPrice) {
+      const newFood = {
+        id: foods.length + 1,
+        name: foodName,
+        description: foodDescription,
+        price: parseFloat(foodPrice),
+        imageUrl: foodImage, // You can adjust the image URL as per requirement
+      };
+      setFoods([...foods, newFood]);
+      setFoodName('');
+      setFoodDescription('');
+      setFoodPrice('');
+      setFoodImage('');
     }
   };
 
-  // Edit a menu item
-  const handleEditItem = (index) => {
-    setMenuItem(menu[index]);
-    setEditIndex(index);
+  // Handle deleting a food item
+  const handleDeleteFood = (id) => {
+    setFoods(foods.filter((food) => food.id !== id));
   };
 
-  // Save updated item
-  const handleSaveItem = () => {
-    const updatedMenu = [...menu];
-    updatedMenu[editIndex] = menuItem;
-    setMenu(updatedMenu);
-    setMenuItem({
-      name: '',
-      description: '',
-      price: '',
-      image: '',
-    });
-    setEditIndex(null);
-  };
+  // Handle editing a food item
+  const handleEditFood = (id) => {
+    const foodToEdit = foods.find((food) => food.id === id);
+    setFoodName(foodToEdit.name);
+    setFoodDescription(foodToEdit.description);
+    setFoodPrice(foodToEdit.price);
+    setFoodImage(foodToEdit.imageUrl);
 
-  // Delete menu item
-  const handleDeleteItem = (index) => {
-    const updatedMenu = menu.filter((_, i) => i !== index);
-    setMenu(updatedMenu);
+    handleDeleteFood(id); // Delete the current item before updating
   };
 
   return (
     <div className="admin-panel">
-      <h2>Admin Panel</h2>
+      <h1>Admin Panel - Manage Food Menu</h1>
 
-      <div className="menu-form">
+      {/* QR Code Section */}
+      <button className="generate-qrcode-btn" onClick={toggleQRVisibility}>
+        {qrVisible ? 'Hide QR Code' : 'Generate QR Code'}
+      </button>
+      {qrVisible && (
+        <div className="qrcode-container">
+          <QRCodeCanvas value="https://rockwoodmenu.vercel.app" size={256} />
+          <button onClick={() => window.print()}>Print QR Code</button>
+        </div>
+      )}
+
+      {/* Food Form Section */}
+      <form onSubmit={handleAddFood} className="food-form">
         <input
           type="text"
-          name="name"
-          placeholder="Item Name"
-          value={menuItem.name}
-          onChange={handleInputChange}
+          placeholder="Food Name"
+          value={foodName}
+          onChange={(e) => setFoodName(e.target.value)}
+          required
         />
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={menuItem.description}
-          onChange={handleInputChange}
-        ></textarea>
+        <input
+          type="text"
+          placeholder="Food Description"
+          value={foodDescription}
+          onChange={(e) => setFoodDescription(e.target.value)}
+          required
+        />
         <input
           type="number"
-          name="price"
-          placeholder="Price"
-          value={menuItem.price}
-          onChange={handleInputChange}
+          step="0.01"
+          placeholder="Food Price"
+          value={foodPrice}
+          onChange={(e) => setFoodPrice(e.target.value)}
+          required
         />
         <input
           type="text"
-          name="image"
-          placeholder="Image URL"
-          value={menuItem.image}
-          onChange={handleInputChange}
+          placeholder="Food Image URL"
+          value={foodImage}
+          onChange={(e) => setFoodImage(e.target.value)}
         />
-        {editIndex !== null ? (
-          <button onClick={handleSaveItem}>Save Item</button>
-        ) : (
-          <button onClick={handleAddItem}>Add Item</button>
-        )}
-      </div>
+        <button type="submit">Add Food</button>
+      </form>
 
-      <div className="menu-list">
-        <h3>Menu Items</h3>
-        {menu.length === 0 ? (
-          <p>No items in the menu.</p>
-        ) : (
-          <ul>
-            {menu.map((item, index) => (
-              <li key={index}>
-                <img src={item.image} alt={item.name} />
-                <h4>{item.name}</h4>
-                <p>{item.description}</p>
-                <p>${item.price}</p>
-                <button onClick={() => handleEditItem(index)}>Edit</button>
-                <button onClick={() => handleDeleteItem(index)}>Delete</button>
-              </li>
-            ))}
-          </ul>
-        )}
+      {/* Display Food List */}
+      <div className="food-list">
+        <h2>Food Menu</h2>
+        <ul>
+          {foods.map((food) => (
+            <li key={food.id} className="food-item">
+              <img src={food.imageUrl} alt={food.name} width="100" height="100" />
+              <div>
+                <h3>{food.name}</h3>
+                <p>{food.description}</p>
+                <p>Price: ${food.price}</p>
+              </div>
+              <button onClick={() => handleEditFood(food.id)}>Edit</button>
+              <button onClick={() => handleDeleteFood(food.id)}>Delete</button>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
