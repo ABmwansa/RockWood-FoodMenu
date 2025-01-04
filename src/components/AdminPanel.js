@@ -79,7 +79,7 @@ const AdminPanel = () => {
   return (
     <div className="admin-panel"> 
       <h1> Manage Food Menu</h1>
-      <button to ="/" className='add-btn' style={{margin:'20px'}}>Go to home page</button>
+      <button to ='/' className='add-btn' style={{margin:'20px'}}>Go to home page</button>
 
       {/* QR Code Section */}
       <button className="generate-qrcode-btn" onClick={toggleQRVisibility}>
