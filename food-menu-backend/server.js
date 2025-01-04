@@ -7,7 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-
+require('dotenv').config();
 
 const app = express();
 app.use(express.json());
@@ -30,14 +30,16 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// MongoDB Connection
+// Conditional MongoDB Connection
+const dbURI = process.env.NODE_ENV === 'production' ? process.env.CLOUD_DB_URI : process.env.LOCAL_DB_URI;
+
 mongoose
-  .connect("mongodb://localhost:27017/FoodMenudb", {
+  .connect(dbURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    dbName: "FoodMenudb",
+    dbName: "FoodMenu",
   })
-  .then(() => console.log("Connected to MongoDB at localhost"))
+  .then(() => console.log(`Connected to MongoDB at ${process.env.NODE_ENV === 'production' ? 'Atlas' : 'localhost'}`))
   .catch((err) => console.error("Failed to connect to MongoDB:", err));
 
 // Multer Storage Configuration
@@ -126,39 +128,19 @@ app.get("/food", async (req, res) => {
   }
 });
 
-app.delete("/api/food/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const deletedFood = await Food.findByIdAndDelete(id);
-    if (deletedFood) {
-      const record = new DeletedFood({ foodId: deletedFood._id });
-      await record.save();
-    }
-
-    res.json({ message: "Food deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting food:", error.message);
-    res.status(500).json({ error: error.message || "Internal server error" });
-  }
-});
-
 // Order Routes
 app.post("/api/orders", async (req, res) => {
   try {
     const { foodId, quantity, totalPrice, tableNumber, userId } = req.body;
 
-    // Ensure required fields are provided
     if (!foodId || !quantity || !totalPrice || !tableNumber) {
       return res.status(400).json({ error: "All required fields must be provided" });
     }
 
-    // Validate quantity (should be at least 1)
     if (quantity < 1) {
       return res.status(400).json({ error: "Quantity must be at least 1" });
     }
 
-    // Create new order
     const newOrder = new Order({
       foodId,
       quantity,
@@ -204,6 +186,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
+// Admin Login & Signup Routes
 app.post('/signup', async (req, res) => {
   const { fullName, email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -217,7 +200,6 @@ app.post('/signup', async (req, res) => {
   res.status(201).send('Account created');
 });
 
-// Login admin
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const admin = await Admin.findOne({ email });
@@ -231,8 +213,8 @@ app.post('/login', async (req, res) => {
     return res.status(400).send('Invalid email or password');
   }
 
-  // Create a token
-  const token = jwt.sign({ id: admin._id }, 'your_jwt_secret_key', { expiresIn: '1h' });
+  // Create a token using SECRET_KEY from environment variable
+  const token = jwt.sign({ id: admin._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
   res.send({ message: 'Login successful', token });
 });
 
