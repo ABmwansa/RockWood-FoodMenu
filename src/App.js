@@ -4,6 +4,8 @@ import Home from './Pages/Home';
 import Menu from './components/Menu';
 import AdminPanel from './components/AdminPanel';
 import QRCode from './components/QRCode';
+import AdminLoginPage from './Pages/AdminLoginPage';
+
 
 const App = () => {
   return (
@@ -11,6 +13,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/menu" element={<Menu />} />
+        <Route path="/admin-login" element={<AdminLoginPage/>} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/qrcode" element={<QRCode />} />
       </Routes>

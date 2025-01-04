@@ -92,7 +92,7 @@ const Home = () => {
         <i className="search-icon fas fa-search"></i>
       </div>
 
-      <div className="food-cards">
+     <div className="food-cards">
   {loading ? (
     <p>Loading food items...</p>
   ) : error ? (

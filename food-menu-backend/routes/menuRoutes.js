@@ -1,27 +1,37 @@
 const express = require("express");
-const MenuItem = require("../models/menuItem");
+const Menu = require("../models/Menu");
 
 const router = express.Router();
 
-// Add Menu Item
-router.post("/add", async (req, res) => {
-  const { name, description, price, category, image } = req.body;
+// Endpoint to fetch all menu items
+router.get("/", async (req, res) => {
   try {
-    const newItem = new MenuItem({ name, description, price, category, image });
-    await newItem.save();
-    res.status(201).json({ message: "Menu item added successfully!" });
+    const menuItems = await Menu.find();
+    res.json(menuItems);
   } catch (error) {
-    res.status(500).json({ message: "Error adding menu item", error });
+    res.status(500).json({ error: "Failed to fetch menu items" });
   }
 });
 
-// Get All Menu Items
-router.get("/", async (req, res) => {
+// Endpoint to add a new menu item
+router.post("/", async (req, res) => {
   try {
-    const items = await MenuItem.find();
-    res.json(items);
+    const { name, description, price, category, image } = req.body;
+    const newMenuItem = new Menu({ name, description, price, category, image });
+    await newMenuItem.save();
+    res.json({ message: "Menu item added successfully", newMenuItem });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching menu items", error });
+    res.status(500).json({ error: "Failed to add menu item" });
+  }
+});
+
+// Endpoint to delete a menu item
+router.delete("/:id", async (req, res) => {
+  try {
+    await Menu.findByIdAndDelete(req.params.id);
+    res.json({ message: "Menu item deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete menu item" });
   }
 });
 
