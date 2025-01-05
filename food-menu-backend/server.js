@@ -62,11 +62,13 @@ const foodSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 // Mongoose User Schema
-const adminSchema = new mongoose.Schema({
-  fullName: String,
-  email: String,
-  password: String,
+const AdminSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, default: 'pending', enum: ['pending', 'approved'] }, // New field for role management
 });
+
 
 const orderSchema = new mongoose.Schema({
   foodId: { type: mongoose.Schema.Types.ObjectId, ref: "Food", required: true },
@@ -92,7 +94,7 @@ const Food = mongoose.model("Food", foodSchema);
 const Order = mongoose.model("Order", orderSchema);
 const DeletedFood = mongoose.model("Deleted", deletedFoodSchema);
 const User = mongoose.model("User", userSchema);
-const Admin = mongoose.model('Admin', adminSchema);
+const Admin = mongoose.model('Admin', AdminSchema);
 
 // Routes
 app.get("/", (req, res) => {
@@ -186,33 +188,71 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// Admin Login & Signup Routes
-app.post('/signup', async (req, res) => {
-  const { fullName, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newAdmin = new Admin({
-    fullName,
-    email,
-    password: hashedPassword,
-  });
 
-  await newAdmin.save();
-  res.status(201).send('Account created');
+// **Sign Up Endpoint**
+app.post('/signup', async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new admin user
+    const newAdmin = new Admin({ name, email, password: hashedPassword });
+
+    await newAdmin.save();
+
+    res.status(201).json({ message: 'Admin account created successfully!' });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Error creating admin account. Email may already exist.' });
+  }
 });
 
+// **Login Endpoint**
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  const admin = await Admin.findOne({ email });
 
-  if (!admin) {
-    return res.status(400).send('Invalid email or password');
+  try {
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) return res.status(404).json({ error: 'Admin account not found.' });
+    if (admin.role === 'pending') return res.status(403).json({ error: 'Admin account not yet approved.' });
+
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
+
+    if (!isPasswordValid) return res.status(401).json({ error: 'Invalid credentials.' });
+
+    // Generate JWT token
+    const token = jwt.sign({ id: admin._id, email: admin.email }, 'secret_key', { expiresIn: '1h' });
+
+    res.json({ token, message: 'Login successful!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error.' });
   }
+});
 
-  const isMatch = await bcrypt.compare(password, admin.password);
-  if (!isMatch) {
-    return res.status(400).send('Invalid email or password');
+// **Get Pending Accounts**
+app.get('/pending-accounts', async (req, res) => {
+  try {
+    const pendingAdmins = await Admin.find({ role: 'pending' });
+    res.json(pendingAdmins);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching pending accounts.' });
   }
+});
 
+// **Approve Account**
+app.put('/approve-account/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Admin.findByIdAndUpdate(id, { role: 'approved' });
+    res.json({ message: 'Admin account approved successfully!' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error approving account.' });
+  }
   // Create a token using SECRET_KEY from environment variable
   const token = jwt.sign({ id: admin._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
   res.send({ message: 'Login successful', token });

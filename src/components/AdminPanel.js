@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { QRCodeCanvas } from 'qrcode.react'; // Import QRCodeCanvas
-import '../style/AdminPanel.css'; // Import the CSS for styling
+import { QRCodeCanvas } from 'qrcode.react';
+import '../style/AdminPanel.css';
 
 const AdminPanel = () => {
   const [qrVisible, setQrVisible] = useState(false);
@@ -11,15 +11,18 @@ const AdminPanel = () => {
   const [foodPrice, setFoodPrice] = useState('');
   const [foodImage, setFoodImage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showFoodList, setShowFoodList] = useState(false);  // Toggle for food list visibility
+  const [showFoodList, setShowFoodList] = useState(false);
+  const [showManageAccounts, setShowManageAccounts] = useState(false); // Toggle for Manage Accounts section
+  const [pendingAccounts, setPendingAccounts] = useState([]); // State for pending accounts
 
-  const BASE_API_URL = 'http://localhost:5000/food';
+  const BASE_API_URL = 'http://localhost:5000';
 
+  // Fetch foods
   useEffect(() => {
     const fetchFoods = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(BASE_API_URL);
+        const response = await axios.get(`${BASE_API_URL}/food`);
         setFoods(response.data);
         setLoading(false);
       } catch (error) {
@@ -27,8 +30,20 @@ const AdminPanel = () => {
         setLoading(false);
       }
     };
-
     fetchFoods();
+  }, []);
+
+  // Fetch pending accounts
+  useEffect(() => {
+    const fetchPendingAccounts = async () => {
+      try {
+        const response = await axios.get(`${BASE_API_URL}/pending-accounts`);
+        setPendingAccounts(response.data);
+      } catch (error) {
+        console.error('Error fetching pending accounts:', error);
+      }
+    };
+    fetchPendingAccounts();
   }, []);
 
   const toggleQRVisibility = () => setQrVisible(!qrVisible);
@@ -43,7 +58,7 @@ const AdminPanel = () => {
       formData.append('image', foodImage);
 
       try {
-        const response = await axios.post(BASE_API_URL, formData, {
+        const response = await axios.post(`${BASE_API_URL}/food`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         setFoods([...foods, response.data]);
@@ -63,32 +78,67 @@ const AdminPanel = () => {
 
   const handleDeleteFood = async (foodId) => {
     try {
-      await axios.delete(`${BASE_API_URL}/${foodId}`);
-      setFoods(foods.filter(food => food.id !== foodId));
+      await axios.delete(`${BASE_API_URL}/food/${foodId}`);
+      setFoods(foods.filter((food) => food.id !== foodId));
     } catch (error) {
       console.error('Error deleting food:', error);
     }
   };
 
   const handleUpdateFood = (food) => {
-    // Here you would typically populate a form for editing an existing food item.
-    // For example, you could use a modal or open a new form with the food's current data.
     console.log('Update food:', food);
   };
 
+  const handleApproveAccount = async (accountId) => {
+    try {
+      await axios.put(`${BASE_API_URL}/approve-account/${accountId}`);
+      setPendingAccounts(pendingAccounts.filter((account) => account.id !== accountId));
+    } catch (error) {
+      console.error('Error approving account:', error);
+    }
+  };
+
   return (
-    <div className="admin-panel"> 
-      <h1> Manage Food Menu</h1>
-      <button to ='/' className='add-btn' style={{margin:'20px'}}>Go to home page</button>
+    <div className="admin-panel">
+      <h1>Manage Food Menu</h1>
+      <button to="/" className="add-btn" style={{ margin: '20px' }}>
+        Go to home page
+      </button>
 
       {/* QR Code Section */}
       <button className="generate-qrcode-btn" onClick={toggleQRVisibility}>
         {qrVisible ? 'Hide QR Code' : 'Generate QR Code'}
       </button>
+
       {qrVisible && (
         <div className="qrcode-container">
           <QRCodeCanvas value="https://rockwoodmenu.vercel.app" size={256} />
           <button onClick={() => window.print()}>Print QR Code</button>
+        </div>
+      )}
+       <button onClick={() => setShowManageAccounts(!showManageAccounts)} className="manage-accounts-btn">
+        {showManageAccounts ? 'Hide Orders' : 'View Orders'}
+      </button>
+      <button onClick={() => setShowManageAccounts(!showManageAccounts)} className="manage-accounts-btn">
+        {showManageAccounts ? 'Hide Manage Accounts' : 'Manage Accounts'}
+      </button>
+     
+      {showManageAccounts && (
+        <div className="manage-accounts">
+          <h2>Pending Accounts</h2>
+          {pendingAccounts.length === 0 && <p>No pending accounts to approve.</p>}
+          {pendingAccounts.length > 0 && (
+            <ul>
+              {pendingAccounts.map((account) => (
+                <li key={account.id}>
+                  <span>{account.name} - {account.email}</span>
+                  <button onClick={() => handleApproveAccount(account.id)} className="approve-account-btn">
+                    Approve
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
@@ -116,13 +166,8 @@ const AdminPanel = () => {
           onChange={(e) => setFoodPrice(e.target.value)}
           required
         />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          required
-        />
-        <button type="submit" className='add-btn'>Add Food</button>
+        <input type="file" accept="image/*" onChange={handleFileChange} required />
+        <button type="submit" className="add-btn">Add Food</button>
       </form>
 
       {/* Toggle Food List Visibility */}
@@ -152,6 +197,10 @@ const AdminPanel = () => {
           </div>
         </div>
       )}
+
+      {/* Manage Accounts Section */}
+      
+     
     </div>
   );
 };
