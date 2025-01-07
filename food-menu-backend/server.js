@@ -243,20 +243,37 @@ app.get('/pending-accounts', async (req, res) => {
   }
 });
 
-// **Approve Account**
+//approve account
 app.put('/approve-account/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    await Admin.findByIdAndUpdate(id, { role: 'approved' });
-    res.json({ message: 'Admin account approved successfully!' });
+    console.log(`Approving admin account with ID: ${id}`); // Add logging here
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      id,
+      { role: 'approved' },
+      { new: true } // Ensures the updated document is returned
+    );
+
+    if (!updatedAdmin) {
+      console.error('Admin account not found'); // Log error if account not found
+      return res.status(404).json({ message: 'Admin account not found.' });
+    }
+
+    const token = jwt.sign({ id: updatedAdmin._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
+
+    console.log('Account approved successfully'); // Log success
+    return res.status(200).json({
+      message: 'Admin account approved successfully!',
+      token,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error approving account.' });
+    console.error('Error approving account:', error); // Log detailed error
+    res.status(500).json({ error: 'Internal Server Error.' });
   }
-  // Create a token using SECRET_KEY from environment variable
-  const token = jwt.sign({ id: admin._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
-  res.send({ message: 'Login successful', token });
 });
+
 
 // Start the Server
 const PORT = process.env.PORT || 5000;
